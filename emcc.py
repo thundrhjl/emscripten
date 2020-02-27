@@ -1304,9 +1304,10 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
     if shared.Settings.ASSERTIONS:
       shared.Settings.STACK_OVERFLOW_CHECK = 2
 
-    if shared.Settings.LLD_REPORT_UNDEFINED:
+    if shared.Settings.LLD_REPORT_UNDEFINED or shared.Settings.STANDALONE_WASM:
       # Reporting undefined symbols at wasm-ld time requires us to know if we have a `main` function
-      # or not.
+      # or not, as does standalone wasm mode.
+      # TODO(sbc): Remove this once this becomes the default
       shared.Settings.IGNORE_MISSING_MAIN = 0
 
     if shared.Settings.STRICT:
@@ -1543,6 +1544,8 @@ There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR P
       if not shared.Settings.STANDALONE_WASM:
         # in standalone mode, crt1 will call the constructors from inside the wasm
         shared.Settings.EXPORTED_FUNCTIONS.append('___wasm_call_ctors')
+        if '_main' in shared.Settings.EXPORTED_FUNCTIONS:
+          shared.Settings.EXPORTED_FUNCTIONS += ['___main_argc_argv']
 
     if shared.Settings.RELOCATABLE and not shared.Settings.DYNAMIC_EXECUTION:
       exit_with_error('cannot have both DYNAMIC_EXECUTION=0 and RELOCATABLE enabled at the same time, since RELOCATABLE needs to eval()')
